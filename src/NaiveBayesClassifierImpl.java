@@ -58,13 +58,13 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
   private void tallyLabel(Instance instance) {
 	  switch(instance.label) {
 		  case COMEDY:
-			  cDocumentSum+=1.0;
+			  cDocumentSum++;
 			  break;
 		  case HISTORY:
-			  hDocumentSum+=1.0;
+			  hDocumentSum++;
 			  break;
 		  case TRAGEDY:
-			  tDocumentSum+=1.0;
+			  tDocumentSum++;
 			  break;
 		  default:
 	  }
@@ -196,10 +196,29 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
     double num = 0.0;
     double den = 1.0;
     
-    num = labelSum (label) + 0.00001;
-    den = 0.00001 * vocabulary.size() + wordSum(label);
+	  switch(label) {
+		  case COMEDY:
+			    num = getCount(comedyCounts, word) + 0.00001;
+			    den = 0.00001 * vocabulary.size() + wordSum(label);
+			    break;
+		  case HISTORY:
+			    num = getCount(historyCounts, word) + 0.00001;
+			    den = 0.00001 * vocabulary.size() + wordSum(label);
+			    break;
+		  case TRAGEDY:
+			    num = getCount(tragedyCounts, word) + 0.00001;
+			    den = 0.00001 * vocabulary.size() + wordSum(label);
+			    break;
+	  }
     
     return num/den;
+  }
+  
+  private double getCount(HashMap<String, Integer> map, String word) {
+	  if (map.containsKey(word))
+		  return map.get(word);
+	  else
+		  return 0.0;
   }
 
   /**
@@ -208,25 +227,30 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
    */
   @Override
   public Label classify(Instance ins) {
-  
-	// TODO : Implement
-	
 	//Initialize sum probabilities for each label
+	  p_l(Label.COMEDY);
+	  p_l(Label.HISTORY);
+	  p_l(Label.TRAGEDY);
+	  double cProb = Math.log(comedyPrior);
+	  double hProb = Math.log(historyPrior);
+	  double tProb = Math.log(tragedyPrior);
 	  
 	//For each word w in document ins
 	  for (int j = 0; j < ins.words.length; j++) {
-		  if (!ins.words[j].equals("")) {
-			  //tallyWord(ins.label, ins.words[j]);
-		  }
+		  //if (!ins.words[j].equals("")) {
+			  cProb += Math.log(p_w_given_l(ins.words[j], Label.COMEDY));
+			  hProb += Math.log(p_w_given_l(ins.words[j], Label.HISTORY));
+			  tProb += Math.log(p_w_given_l(ins.words[j], Label.TRAGEDY));
+		  //}
 	  }
-		//compute the log (base e or default java log) probability of w|label for all labels (COMEDY, TRAGEDY, HISTORY)
-		//add to appropriate sum
-	//Return the Label of the maximal sum probability
-
-    return null; 
+	  
+	  if (cProb > hProb && cProb > tProb) {
+		  return Label.COMEDY;
+	  } else if (hProb > tProb) {
+		  return Label.HISTORY;
+	  } else {
+		  return Label.TRAGEDY;
+	  } 
   }
-  
-  
-  
   
 }
