@@ -21,9 +21,9 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
    private double comedyPrior;
    private double historyPrior; 
    
-   private double tragedySum;
-   private double comedySum;
-   private double historySum;
+   private double tDocumentSum;
+   private double cDocumentSum;
+   private double hDocumentSum;
    
    //total number of word TOKENS for each type of document in the training set, ie. the sum of the length of all documents with a given label
    private int tTokenSum;
@@ -42,12 +42,31 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
   @Override
   public void train(Instance[] trainingData) {
 	  for (int i = 0; i < trainingData.length; i++) {
-		  tallyLabel(trainingData[i]);		//Tally Prior value based on this instance
+		  tallyLabel(trainingData[i]);
 		  for (int j = 0; j < trainingData[i].words.length; j++) {
-			  if (!trainingData[i].words[j].equals("")) {
+			  //if (!trainingData[i].words[j].equals("")) {
 				  tallyWord(trainingData[i].label, trainingData[i].words[j]);
-			  }
+			  //}
 		  }
+	  }
+  }
+  
+  /**
+   * This function increments the corresponding document tally.
+   * @param instance
+   */
+  private void tallyLabel(Instance instance) {
+	  switch(instance.label) {
+		  case COMEDY:
+			  cDocumentSum+=1.0;
+			  break;
+		  case HISTORY:
+			  hDocumentSum+=1.0;
+			  break;
+		  case TRAGEDY:
+			  tDocumentSum+=1.0;
+			  break;
+		  default:
 	  }
   }
   
@@ -69,6 +88,7 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
 				  comedyCounts.put(word, comedyCounts.get(word) + 1);
 			  }
 			  cTokenSum++;
+			  break;
 		  case HISTORY:
 			  if (!historyCounts.containsKey(word)) {
 				  historyCounts.put(word, 1);
@@ -76,6 +96,7 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
 				  historyCounts.put(word, historyCounts.get(word) + 1);
 			  }
 			  hTokenSum++;
+			  break;
 		  case TRAGEDY:
 			  if (!tragedyCounts.containsKey(word)) {
 				  tragedyCounts.put(word, 1);
@@ -83,24 +104,9 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
 				  tragedyCounts.put(word, tragedyCounts.get(word) + 1);
 			  }
 			  tTokenSum++;
+			  break;
 		  default:
 			  
-	  }
-  }
-  
-  /**
-   * This function increments the corresponding Prior tally.
-   * @param instance
-   */
-  private void tallyLabel(Instance instance) {
-	  switch(instance.label) {
-		  case COMEDY:
-			  comedySum++;
-		  case HISTORY:
-			  historySum++;
-		  case TRAGEDY:
-			  tragedySum++;
-		  default:
 	  }
   }
 
@@ -109,9 +115,9 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
    * A sanity check method
    */
   public void documents_per_label_count(){
-	  System.out.println("Documents per Comedy label count: " + comedySum);
-	  System.out.println("Documents per History label count: " + historySum);
-	  System.out.println("Documents per Tragedy label count: " + tragedySum);
+	  System.out.println("Documents per Comedy label count: " + cDocumentSum);
+	  System.out.println("Documents per History label count: " + hDocumentSum);
+	  System.out.println("Documents per Tragedy label count: " + tDocumentSum);
   }
 
   /*
@@ -132,13 +138,13 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
   public double p_l(Label label) {
 	  switch(label) {
 		  case COMEDY:
-			  comedyPrior = comedySum/(comedySum + historySum + tragedySum);
+			  comedyPrior = cDocumentSum/(cDocumentSum + hDocumentSum + tDocumentSum);
 			  return comedyPrior;
 		  case HISTORY:
-			  historyPrior = historySum/(comedySum + historySum + tragedySum);
+			  historyPrior = hDocumentSum/(cDocumentSum + hDocumentSum + tDocumentSum);
 			  return historyPrior;
 		  case TRAGEDY:
-			  tragedyPrior = tragedySum/(comedySum + historySum + tragedySum);
+			  tragedyPrior = tDocumentSum/(cDocumentSum + hDocumentSum + tDocumentSum);
 			  return tragedyPrior;
 		  default:
 			  return 0;
@@ -153,11 +159,11 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
   public double labelSum(Label label) {
 	  switch(label) {
 		  case COMEDY:
-			  return comedySum;
+			  return cDocumentSum;
 		  case HISTORY:
-			  return historySum;
+			  return hDocumentSum;
 		  case TRAGEDY:
-			  return tragedySum;
+			  return tDocumentSum;
 		  default:
 			  return 0;
 	  }
@@ -171,11 +177,11 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
   public double wordSum(Label label) {
 	  switch(label) {
 		  case COMEDY:
-			  return comedySum;
+			  return cTokenSum;
 		  case HISTORY:
-			  return historySum;
+			  return hTokenSum;
 		  case TRAGEDY:
-			  return tragedySum;
+			  return tTokenSum;
 		  default:
 			  return 0;
 	  }
