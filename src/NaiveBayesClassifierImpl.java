@@ -37,7 +37,18 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
    */
   @Override
   public void train(Instance[] trainingData) {
-    // TODO : Implement
+    // TODO : Implement 1
+	  for (int i = 0; i < trainingData.length; i++) {
+		  switch(trainingData[i].label) {
+			  case COMEDY:
+				  comedyPrior++;
+			  case HISTORY:
+				  historyPrior++;
+			  case TRAGEDY:
+				  tragedyPrior++;
+			  default:
+		  }
+	  }
   }
 
   /*
@@ -62,14 +73,14 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
   @Override
   public double p_l(Label label) {
 	  switch(label) {
-	  case COMEDY:
-		  return comedyPrior/(tragedyPrior + comedyPrior + historyPrior);
-	  case HISTORY:
-		  return historyPrior/(tragedyPrior + comedyPrior + historyPrior);
-	  case TRAGEDY:
-		  return tragedyPrior/(tragedyPrior + comedyPrior + historyPrior);
-	  default:
-		  return 0;
+		  case COMEDY:
+			  return comedyPrior/(tragedyPrior + comedyPrior + historyPrior);
+		  case HISTORY:
+			  return historyPrior/(tragedyPrior + comedyPrior + historyPrior);
+		  case TRAGEDY:
+			  return tragedyPrior/(tragedyPrior + comedyPrior + historyPrior);
+		  default:
+			  return 0;
 	  }
   }
 
@@ -93,6 +104,7 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
 	// TODO : Implement
 	
 	//Initialize sum probabilities for each label
+	  
 	//For each word w in document ins
 		//compute the log (base e or default java log) probability of w|label for all labels (COMEDY, TRAGEDY, HISTORY)
 		//add to appropriate sum
