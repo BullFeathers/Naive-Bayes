@@ -144,6 +144,42 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
 			  return 0;
 	  }
   }
+  
+  /**
+   * Returns the sum of the occurrences of the label parameter
+   * @param label
+   * @return
+   */
+  public double labelSum(Label label) {
+	  switch(label) {
+		  case COMEDY:
+			  return comedySum;
+		  case HISTORY:
+			  return historySum;
+		  case TRAGEDY:
+			  return tragedySum;
+		  default:
+			  return 0;
+	  }
+  }  
+  
+  /**
+   * Returns the sum of the occurrences of the word in the genre.
+   * @param label
+   * @return
+   */
+  public double wordSum(Label label) {
+	  switch(label) {
+		  case COMEDY:
+			  return comedySum;
+		  case HISTORY:
+			  return historySum;
+		  case TRAGEDY:
+			  return tragedySum;
+		  default:
+			  return 0;
+	  }
+  }
 
   /**
    * Returns the smoothed conditional probability of the word given the label, i.e. P(word|COMEDY) or
@@ -151,8 +187,13 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
    */
   @Override
   public double p_w_given_l(String word, Label label) {
-    // TODO : Implement
-    return 0;
+    double num = 0.0;
+    double den = 1.0;
+    
+    num = labelSum (label) + 0.00001;
+    den = 0.00001 * vocabulary.size() + wordSum(label);
+    
+    return num/den;
   }
 
   /**
@@ -167,12 +208,19 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
 	//Initialize sum probabilities for each label
 	  
 	//For each word w in document ins
+	  for (int j = 0; j < ins.words.length; j++) {
+		  if (!ins.words[j].equals("")) {
+			  //tallyWord(ins.label, ins.words[j]);
+		  }
+	  }
 		//compute the log (base e or default java log) probability of w|label for all labels (COMEDY, TRAGEDY, HISTORY)
 		//add to appropriate sum
 	//Return the Label of the maximal sum probability
 
     return null; 
   }
+  
+  
   
   
 }
