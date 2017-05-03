@@ -19,7 +19,11 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
    //use the training set for the numerator and denominator
    private double tragedyPrior;
    private double comedyPrior;
-   private double historyPrior;
+   private double historyPrior; 
+   
+   private double tragedySum;
+   private double comedySum;
+   private double historySum;
    
    //total number of word TOKENS for each type of document in the training set, ie. the sum of the length of all documents with a given label
    private int tTokenSum;
@@ -37,17 +41,66 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
    */
   @Override
   public void train(Instance[] trainingData) {
-    // TODO : Implement 1
 	  for (int i = 0; i < trainingData.length; i++) {
-		  switch(trainingData[i].label) {
-			  case COMEDY:
-				  comedyPrior++;
-			  case HISTORY:
-				  historyPrior++;
-			  case TRAGEDY:
-				  tragedyPrior++;
-			  default:
+		  tallyLabel(trainingData[i]);		//Tally Prior value based on this instance
+		  for (int j = 0; j < trainingData[i].words.length; j++) {
+			  if (!trainingData[i].words[j].equals("")) {
+				  tallyWord(trainingData[i].label, trainingData[i].words[j]);
+			  }
 		  }
+	  }
+  }
+  
+  /**
+   * With the given word, this function updates the appropriate count hashmap and increments the appropriate token sum.
+   * @param genre
+   * @param word
+   */
+  private void tallyWord(Label genre, String word) {
+	  if (!vocabulary.contains(word)) {
+		  vocabulary.add(word);
+	  }
+	  
+	  switch(genre) {
+		  case COMEDY:
+			  if (!comedyCounts.containsKey(word)) {
+				  comedyCounts.put(word, 1);
+			  } else {
+				  comedyCounts.put(word, comedyCounts.get(word) + 1);
+			  }
+			  cTokenSum++;
+		  case HISTORY:
+			  if (!historyCounts.containsKey(word)) {
+				  historyCounts.put(word, 1);
+			  } else {
+				  historyCounts.put(word, historyCounts.get(word) + 1);
+			  }
+			  hTokenSum++;
+		  case TRAGEDY:
+			  if (!tragedyCounts.containsKey(word)) {
+				  tragedyCounts.put(word, 1);
+			  } else {
+				  tragedyCounts.put(word, tragedyCounts.get(word) + 1);
+			  }
+			  tTokenSum++;
+		  default:
+			  
+	  }
+  }
+  
+  /**
+   * This function increments the corresponding Prior tally.
+   * @param instance
+   */
+  private void tallyLabel(Instance instance) {
+	  switch(instance.label) {
+		  case COMEDY:
+			  comedySum++;
+		  case HISTORY:
+			  historySum++;
+		  case TRAGEDY:
+			  tragedySum++;
+		  default:
 	  }
   }
 
@@ -56,7 +109,9 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
    * A sanity check method
    */
   public void documents_per_label_count(){
-    // TODO : Implement
+	  System.out.println("Documents per Comedy label count: " + comedySum);
+	  System.out.println("Documents per History label count: " + historySum);
+	  System.out.println("Documents per Tragedy label count: " + tragedySum);
   }
 
   /*
@@ -65,6 +120,9 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
    */
   public void words_per_label_count(){
     // TODO : Implement
+	  System.out.println("Words per Comedy label count: " + cTokenSum);
+	  System.out.println("Words per History label count: " + hTokenSum);
+	  System.out.println("Words per Tragedy label count: " + tTokenSum);
   }
 
   /**
@@ -74,11 +132,14 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
   public double p_l(Label label) {
 	  switch(label) {
 		  case COMEDY:
-			  return comedyPrior/(tragedyPrior + comedyPrior + historyPrior);
+			  comedyPrior = comedySum/(comedySum + historySum + tragedySum);
+			  return comedyPrior;
 		  case HISTORY:
-			  return historyPrior/(tragedyPrior + comedyPrior + historyPrior);
+			  historyPrior = historySum/(comedySum + historySum + tragedySum);
+			  return historyPrior;
 		  case TRAGEDY:
-			  return tragedyPrior/(tragedyPrior + comedyPrior + historyPrior);
+			  tragedyPrior = tragedySum/(comedySum + historySum + tragedySum);
+			  return tragedyPrior;
 		  default:
 			  return 0;
 	  }
