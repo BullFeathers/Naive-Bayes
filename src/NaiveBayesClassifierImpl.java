@@ -27,13 +27,13 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
    private int hTokenSum;
    
    //full vocabulary, update in training, cardinality is necessary for smoothing
-   private HashSet<String> vocabulary = new HashSet<String>;
+   private HashSet<String> vocabulary = new HashSet<String>();
    
 
   /**
    * Trains the classifier with the provided training data
    Should iterate through the training instances, and, for each word in the documents, update the variables above appropriately.
-   The dictionary of frequencies and prior probabilites can then be used at classification time.
+   The dictionary of frequencies and prior probabilities can then be used at classification time.
    */
   @Override
   public void train(Instance[] trainingData) {
@@ -61,8 +61,16 @@ public class NaiveBayesClassifierImpl implements NaiveBayesClassifier {
    */
   @Override
   public double p_l(Label label) {
-    // TODO : Implement
-    return 0;
+	  switch(label) {
+	  case COMEDY:
+		  return comedyPrior/(tragedyPrior + comedyPrior + historyPrior);
+	  case HISTORY:
+		  return historyPrior/(tragedyPrior + comedyPrior + historyPrior);
+	  case TRAGEDY:
+		  return tragedyPrior/(tragedyPrior + comedyPrior + historyPrior);
+	  default:
+		  return 0;
+	  }
   }
 
   /**
